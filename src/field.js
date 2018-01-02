@@ -37,6 +37,7 @@ var Field = function(context, width, height) {
       if(block === undefined) {
         var block = new Block(
           that.context,
+          that.events,
           Math.floor(Math.random() * 4),
           x,
           y)
@@ -47,6 +48,7 @@ var Field = function(context, width, height) {
   }
 
   this.render = function() {
+    this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height)
     this.context.fillStyle = 'black'
     this.eachBlock(function(block) {
       block.render()
@@ -54,6 +56,7 @@ var Field = function(context, width, height) {
   }
 
   this.start = function() {
+    this.events.addObserver(this)
     var that = this
     var timerID = setInterval(function() {
       that.render()
@@ -75,6 +78,29 @@ var Field = function(context, width, height) {
     var blockCoord = this.mousePositionToCoord(mouseX, mouseY)
     if(blockCoord != undefined) {
       this.events.emit(event, blockCoord)
+    }
+  }
+
+  this.startRemoving = false
+  this.markedBlocks = []
+
+  this.handleEvent = function(event, params) {
+    if(event == 'click') {
+      this.markedBlocks = []
+      this.startRemoving = false
+    }
+    if(event == 'markblock') {
+      this.markedBlocks.push(params)
+      if(this.markedBlocks.length >= 3) {
+        this.startRemoving = true
+      }
+      if(this.startRemoving) {
+        var block
+        while(block = this.markedBlocks.pop()) {
+          console.log("Remove ", block)
+          block.remove()
+        }
+      }
     }
   }
 }

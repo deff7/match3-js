@@ -6,17 +6,20 @@ var colors = {
 }
 
 var properties = {
-  size: 40,
+  size: 64,
   margin: 5,
 }
 properties.field = properties.size + properties.margin
 
-var Block = function(context, color, x, y) {
+var Block = function(context, events, color, x, y) {
   this.context = context
+  this.events = events
   this.color = color
   this.x = x
   this.y = y
   this.state = null
+
+  this.scale = 1.0
 
   this.render = function() {
     this.context.save()
@@ -24,10 +27,27 @@ var Block = function(context, color, x, y) {
     if (this.state == 'hover') {
       color = 'white'
     } 
-    this.context.fillStyle = color
-    this.context.fillRect(
+    if (this.state == 'removed') {
+      if(this.scale >= 0.1) {
+        this.scale -= 0.1
+      } else {
+        this.scale = 0
+      }
+      this.context.translate(
+        (1 - this.scale) * properties.size / 2,
+        (1 - this.scale) * properties.size / 2,
+      )
+    }
+    this.context.translate(
       this.x * properties.field,
       this.y * properties.field,
+    )
+
+    this.context.scale(this.scale, this.scale)
+    this.context.fillStyle = color
+    this.context.fillRect(
+      0,
+      0,
       properties.size,
       properties.size
     )
@@ -38,18 +58,47 @@ var Block = function(context, color, x, y) {
       return position.x == this.x && position.y == this.y
   }
 
+  this.isNearMe = function(pos) {
+    if(this.x == pos.x) {
+      if(this.y == pos.y - 1 || this.y == pos.y + 1) return true
+    } else if(this.y == pos.y) {
+      if(this.x == pos.x - 1 || this.x == pos.x + 1) return true
+    }
+    return false
+  }
+
+  this.mark = function() {
+    this.state = 'marked'
+    this.events.emit(
+      'markblock',
+      this
+    )
+  }
+
+  this.remove = function() {
+    this.state = 'removed'
+  }
+
   this.handleEvent = function(event, params) {
+    if(this.state == 'removed') return
     if(this.isMyEvent(params)) {
       switch(event) {
         case 'hover':
           this.state = 'hover'
           return
         case 'click':
-          this.state = 'click'
+          this.mark()
           return
       }
+    } else if(event == 'markblock' && this.state != 'marked') {
+      if(params.color == this.color && this.isNearMe(params)) {
+        this.mark()
+        return
+      }
     }
-    this.state = null
+    if(this.state != 'marked') {
+      this.state = null
+    }
   }
 }
 

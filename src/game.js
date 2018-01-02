@@ -2,8 +2,8 @@ var Field = require('./field')
 var canvas = document.getElementById('canvas')
 var context = canvas.getContext('2d')
 
-canvas.width = 500
-canvas.height = 500
+canvas.width = 700
+canvas.height = 700
 
 context.fillStyle = 'green'
 
