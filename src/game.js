@@ -9,12 +9,28 @@ context.fillStyle = 'green'
 
 var field = new Field(context, 10, 10)
 field.generate()
-field.render()
+field.start()
 
-canvas.addEventListener('click', field.mouseClick)
-canvas.addEventListener('mousemove', function(event) {
-  var rect = canvas.getBoundingClientRect(),
-    x = event.clientX - rect.left,
-    y = event.clientY - rect.top
-  field.mouseOver(x, y)
-})
+var getMousePosition = function(event) {
+  var rect = canvas.getBoundingClientRect()
+  return({
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  })
+}
+
+var listeners = {
+  click: 'click',
+  mousemove: 'hover'
+}
+
+for(var eventName in listeners) {
+  (function() {
+    var event = listeners[eventName]
+    canvas.addEventListener(eventName, function(e) {
+      var position = getMousePosition(e)
+      field.emitMouseOnBlockEvent(position.x, position.y, event)
+    })
+  })()
+}
+

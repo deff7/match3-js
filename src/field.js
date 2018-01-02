@@ -1,16 +1,19 @@
 var Block = require('./block.js')
+var Events = require('./events.js')
 
 console.log(Block.properties)
 
 var Field = function(context, width, height) {
+  this.events = new Events()
   this.context = context
 
   this.width = width
   this.height = height
 
-  this.blockSize = 32
-  this.blockMargin = 5
-  this.blockField = this.blockSize + this.blockMargin
+  this.blocksArea = {
+    width: Block.properties.field * width,
+    height: Block.properties.field * height
+  }
 
   this.map = new Array(height)
   for(var i = 0; i < height; i++) {
@@ -32,11 +35,13 @@ var Field = function(context, width, height) {
     var that = this
     this.eachBlock(function(block, x, y) {
       if(block === undefined) {
-        return new Block(
+        var block = new Block(
           that.context,
           Math.floor(Math.random() * 4),
           x,
           y)
+        that.events.addObserver(block)
+        return block
       }
     })
   }
@@ -48,11 +53,29 @@ var Field = function(context, width, height) {
     })
   }
 
-  this.mouseOver = function(mouseX, mouseY) {
+  this.start = function() {
+    var that = this
+    var timerID = setInterval(function() {
+      that.render()
+    }, 33)
   }
 
-  this.mouseClick = function(event) {
-    console.log(event)
+  this.mousePositionToCoord = function(mouseX, mouseY) {
+    var mouseFitInWidth = mouseX >= 0 && mouseX <= this.blocksArea.width,
+      mouseFitInHeight = mouseY >= 0 && mouseY <= this.blocksArea.height
+    if(mouseFitInWidth && mouseFitInHeight) {
+      return({
+        x: Math.floor(mouseX / Block.properties.field),
+        y: Math.floor(mouseY / Block.properties.field)
+        })
+    }
+  }
+
+  this.emitMouseOnBlockEvent = function(mouseX, mouseY, event) {
+    var blockCoord = this.mousePositionToCoord(mouseX, mouseY)
+    if(blockCoord != undefined) {
+      this.events.emit(event, blockCoord)
+    }
   }
 }
 
