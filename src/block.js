@@ -5,27 +5,31 @@ var colors = {
   3: '#B191FF', //blue
 }
 
+var properties = {
+  size: 40,
+  margin: 5,
+}
+properties.field = properties.size + properties.margin
+
 var Block = function(context, color, x, y) {
   this.context = context
   this.color = color
   this.x = x
   this.y = y
 
-  this.blockSize = 40
-  this.blockMargin = 5
-  this.blockField = this.blockSize + this.blockMargin
-
   this.render = function() {
     this.context.save()
     this.context.fillStyle = colors[this.color]
     this.context.fillRect(
-      this.x * this.blockField,
-      this.y * this.blockField,
-      this.blockSize,
-      this.blockSize
+      this.x * properties.field,
+      this.y * properties.field,
+      properties.size,
+      properties.size
     )
     this.context.restore()
   }
 }
+
+Block.properties = properties
 
 module.exports = Block

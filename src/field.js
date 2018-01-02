@@ -1,7 +1,10 @@
 var Block = require('./block.js')
 
+console.log(Block.properties)
+
 var Field = function(context, width, height) {
   this.context = context
+
   this.width = width
   this.height = height
 
@@ -43,6 +46,13 @@ var Field = function(context, width, height) {
     this.eachBlock(function(block) {
       block.render()
     })
+  }
+
+  this.mouseOver = function(mouseX, mouseY) {
+  }
+
+  this.mouseClick = function(event) {
+    console.log(event)
   }
 }
 
