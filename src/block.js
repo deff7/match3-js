@@ -27,11 +27,12 @@ var Block = function(context, events, color, x, y) {
     if (this.state == 'hover') {
       color = 'white'
     } 
-    if (this.state == 'removed') {
+    if (this.state == 'remove') {
       if(this.scale >= 0.1) {
         this.scale -= 0.1
       } else {
         this.scale = 0
+        this.events.emit('remove_block', {x: this.x, y: this.y})
       }
       this.context.translate(
         (1 - this.scale) * properties.size / 2,
@@ -76,11 +77,13 @@ var Block = function(context, events, color, x, y) {
   }
 
   this.remove = function() {
-    this.state = 'removed'
+    this.state = 'remove'
   }
 
   this.handleEvent = function(event, params) {
-    if(this.state == 'removed') return
+    if(this.state == 'remove') {
+      return
+    }
     if(this.isMyEvent(params)) {
       switch(event) {
         case 'hover':

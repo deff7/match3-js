@@ -51,7 +51,9 @@ var Field = function(context, width, height) {
     this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height)
     this.context.fillStyle = 'black'
     this.eachBlock(function(block) {
-      block.render()
+      if(block != undefined) {
+        block.render()
+      }
     })
   }
 
@@ -97,10 +99,13 @@ var Field = function(context, width, height) {
       if(this.startRemoving) {
         var block
         while(block = this.markedBlocks.pop()) {
-          console.log("Remove ", block)
           block.remove()
         }
       }
+    }
+
+    if(event == 'remove_block') {
+      delete this.map[params.y][params.x]
     }
   }
 }
