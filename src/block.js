@@ -1,8 +1,8 @@
 var colors = {
-  0: '#CBE896', //green
-  1: '#FF299C', //pink
+  0: '#59CD90', //green
+  1: '#EE6352', //pink
   2: '#F8F991', //yellow
-  3: '#B191FF', //blue
+  3: '#53D8FB', //blue
 }
 
 var properties = {
@@ -42,13 +42,13 @@ var Block = function(context, events, color, x, y) {
 
     if (this.state == 'dropping') {
       if(this.animY < 1) {
-        /*this.context.translate(
+        this.context.translate(
           0,
-          - (1 - this.animY) * properties.field
-        )*/
-        this.animY += 0.1
+          this.animY * properties.field
+        )
+        this.animY += 0.5 * this.animYSpeed * this.animYSpeed
+        this.animYSpeed += 0.5
       } else {
-        console.log('Dropped', this)
         this.state = null
         this.events.emit('dropped_block', {x: this.x, y: this.y})
       }
@@ -89,9 +89,9 @@ var Block = function(context, events, color, x, y) {
           return
         }
         case 'drop_block': {
-          console.log('Start dropping: ', this)
           this.state = 'dropping'
           this.animY = 0.0
+          this.animYSpeed = 1.0
           return
         }
       }

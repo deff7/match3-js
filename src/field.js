@@ -2,8 +2,6 @@ var Block = require('./block.js')
 var Events = require('./events.js')
 var Logger = require('./logger.js')
 
-console.log(Block.properties)
-
 var Field = function(context, width, height) {
   this.events = new Events()
   this.context = context
@@ -96,7 +94,6 @@ var Field = function(context, width, height) {
       that = this
     for(var x = 0; x < width; x++) {
       if(this.dropping[x]) {
-        console.log('Dropping in process for x = ', x)
         continue
       }
       var emptyFound = false
@@ -155,7 +152,6 @@ var Field = function(context, width, height) {
         })
         break
       }
-
       case 'removed_block': {
         this.map[params.y][params.x] = undefined
         this.markedBlocks.delete(params)
@@ -165,7 +161,6 @@ var Field = function(context, width, height) {
         break
       }
       case 'dropped_block': {
-        console.log('Dropped block: ', params)
         var block = this.map[params.y][params.x]
         this.map[block.y][block.x] = undefined
         this.map[block.y + 1][block.x] = block
