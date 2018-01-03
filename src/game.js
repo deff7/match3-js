@@ -13,6 +13,7 @@ field.start()
 
 var getMousePosition = function(event) {
   var rect = canvas.getBoundingClientRect()
+  console.log(event, rect)
   return({
     x: event.clientX - rect.left,
     y: event.clientY - rect.top

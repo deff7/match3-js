@@ -1,5 +1,22 @@
 body {
-  background-color: #555;
+  background-color: #B4D4EE;
   text-align: center;
+}
+
+.wrapper {
+  display: inline-block;
+  padding: 10px 5px 10px 10px;
+  border: 6px solid #7083b5;
+  background-color: #8d9fd0;
+}
+
+h1 {
+  font-family: 'helvetica';
+  font-size: 48px;
+  color: #feffef;
+  text-shadow: 0 0 2px black;
+}
+
+canvas {
 }
 

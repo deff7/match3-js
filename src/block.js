@@ -1,12 +1,7 @@
-var colors = {
-  0: '#59CD90', //green
-  1: '#EE6352', //pink
-  2: '#F8F991', //yellow
-  3: '#53D8FB', //blue
-}
+var Resources = require('./resources.js')
 
 var properties = {
-  size: 64,
+  size: 48,
   margin: 5,
 }
 properties.field = properties.size + properties.margin
@@ -23,10 +18,6 @@ var Block = function(context, events, color, x, y) {
 
   this.render = function() {
     this.context.save()
-    var color = colors[this.color]
-    if (this.state == 'hover') {
-      color = 'white'
-    } 
     if (this.state == 'removing') {
       if(this.scale >= 0.1) {
         this.scale -= 0.1
@@ -61,12 +52,21 @@ var Block = function(context, events, color, x, y) {
 
     this.context.scale(this.scale, this.scale)
     this.context.fillStyle = color
-    this.context.fillRect(
-      0,
-      0,
-      properties.size,
-      properties.size
-    )
+    if(!Resources.loading) {
+      this.context.drawImage(Resources.images.gems[this.color], 0, 0)
+    }
+    if (this.state == 'hover') {
+      this.context.globalCompositeOperation = 'source-atop'
+      this.context.fillStyle = 'white'
+      this.context.globalAlpha = 0.2
+      this.context.fillRect(
+            0,
+            0,
+            properties.size,
+            properties.size
+      )
+    } 
+    
     this.context.restore()
   }
 

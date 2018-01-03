@@ -14,6 +14,9 @@ var Field = function(context, width, height) {
     height: Block.properties.field * height
   }
 
+  this.context.canvas.width = this.blocksArea.width
+  this.context.canvas.height = this.blocksArea.height
+
   this.map = new Array(height)
   for(var i = 0; i < height; i++) {
     this.map[i] = new Array(width)
@@ -37,7 +40,7 @@ var Field = function(context, width, height) {
         var block = new Block(
           that.context,
           that.events,
-          Math.floor(Math.random() * 4),
+          Math.floor(Math.random() * 6),
           x,
           y)
         that.events.addObserver(block)
