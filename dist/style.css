@@ -1,6 +1,7 @@
 body {
   background-color: #B4D4EE;
   text-align: center;
+  font-family: 'helvetica';
 }
 
 .wrapper {
@@ -11,12 +12,20 @@ body {
 }
 
 h1 {
-  font-family: 'helvetica';
   font-size: 48px;
   color: #feffef;
   text-shadow: 0 0 2px black;
 }
 
-canvas {
+.score {
+  font-size: 25px;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 2px;
+  background-color: rgba(0,0,0,0.08);
+  margin: -10px -5px 10px -10px;
+}
+
+.score__value {
 }
 

@@ -22,6 +22,8 @@ var Field = function(context, width, height) {
     this.map[i] = new Array(width)
   }
 
+  this.score = 0
+
   this.eachBlock = function(callback) {
     for(var y = 0; y < this.height; y++) {
       for(var x = 0; x < this.width; x++) {
@@ -149,10 +151,14 @@ var Field = function(context, width, height) {
     switch(event) {
       case 'click': {
         this.markBlocks(params)
-        var that = this
-        this.markedBlocks.forEach(function(block) {
-          that.events.emit('remove_block', block)
-        })
+        if(this.markedBlocks.size >= 3) {
+          this.score += this.markedBlocks.size
+          document.getElementsByClassName('score__value')[0].innerHTML = this.score
+          var that = this
+          this.markedBlocks.forEach(function(block) {
+            that.events.emit('remove_block', block)
+          })
+        }
         break
       }
       case 'removed_block': {

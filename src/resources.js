@@ -14,7 +14,6 @@ for(var i = 0; i < 6; i++) {
       Resources.imagesToLoad--
       if(Resources.imagesToLoad == 0) {
         Resources.loading = false
-        console.log(Resources.images)
       }
     })
     image.src = 'data/gem_' + i + '.png'
