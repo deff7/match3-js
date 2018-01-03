@@ -1,5 +1,6 @@
 var Block = require('./block.js')
 var Events = require('./events.js')
+var Logger = require('./logger.js')
 
 console.log(Block.properties)
 
@@ -21,11 +22,11 @@ var Field = function(context, width, height) {
   }
 
   this.eachBlock = function(callback) {
-    for(var i = 0; i < this.width; i++) {
-      for(var j = 0; j < this.height; j++) {
-        var result = callback(this.map[j][i], i, j)
+    for(var y = 0; y < this.height; y++) {
+      for(var x = 0; x < this.width; x++) {
+        var result = callback(this.map[y][x], x, y)
         if (result != undefined) {
-          this.map[j][i] = result
+          this.map[y][x] = result
         }
       }
     }
@@ -47,6 +48,10 @@ var Field = function(context, width, height) {
     })
   }
 
+  this.getBlock = function(x, y) {
+    return this.map[y][x]
+  }
+
   this.render = function() {
     this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height)
     this.context.fillStyle = 'black'
@@ -58,6 +63,7 @@ var Field = function(context, width, height) {
   }
 
   this.start = function() {
+    this.events.addObserver(new Logger())
     this.events.addObserver(this)
     var that = this
     var timerID = setInterval(function() {
@@ -83,29 +89,92 @@ var Field = function(context, width, height) {
     }
   }
 
-  this.startRemoving = false
-  this.markedBlocks = []
+  this.dropping = new Array(width)
 
-  this.handleEvent = function(event, params) {
-    if(event == 'click') {
-      this.markedBlocks = []
-      this.startRemoving = false
-    }
-    if(event == 'markblock') {
-      this.markedBlocks.push(params)
-      if(this.markedBlocks.length >= 3) {
-        this.startRemoving = true
+  this.dropBlocks = function() {
+    var blocksToDrop = [],
+      that = this
+    for(var x = 0; x < width; x++) {
+      if(this.dropping[x]) {
+        console.log('Dropping in process for x = ', x)
+        continue
       }
-      if(this.startRemoving) {
-        var block
-        while(block = this.markedBlocks.pop()) {
-          block.remove()
+      var emptyFound = false
+      for(var y = this.height - 1; y >= 0; y--) {
+        var block = this.map[y][x]
+        if(block == undefined) {
+          emptyFound = true
+        } else if(emptyFound && block.state != 'dropping' ) {
+          this.dropping[x] = true
+          blocksToDrop.push(block)
+          break
         }
       }
     }
 
-    if(event == 'remove_block') {
-      delete this.map[params.y][params.x]
+    blocksToDrop.forEach(function(block) {
+      that.events.emit('drop_block', block)
+    })
+  }
+
+  this.markBlocks = function(position) {
+    this.markedBlocks = new Set()
+    var color = this.map[position.y][position.x].color,
+      that = this,
+      checked = new Array(height)
+    for(var i = 0; i < height; i++) {
+      checked[i] = new Array(width)
+    }
+    var crawl = function(pos) {
+      if(pos.x < 0 || pos.x >= width || pos.y < 0 || pos.y >= height) {
+        return
+      }
+      if(checked[pos.y][pos.x]) {
+        return
+      }
+      checked[pos.y][pos.x] = true
+      var block = that.map[pos.y][pos.x]
+      if(block != undefined && block.color == color) {
+        that.markedBlocks.add(block)
+        crawl({x: pos.x - 1, y: pos.y})
+        crawl({x: pos.x + 1, y: pos.y})
+        crawl({x: pos.x, y: pos.y - 1})
+        crawl({x: pos.x, y: pos.y + 1})
+      }
+    }
+    crawl(position)
+  }
+
+  this.handleEvent = function(event, params) {
+    switch(event) {
+      case 'click': {
+        this.markBlocks(params)
+        var that = this
+        this.markedBlocks.forEach(function(block) {
+          that.events.emit('remove_block', block)
+        })
+        break
+      }
+
+      case 'removed_block': {
+        this.map[params.y][params.x] = undefined
+        this.markedBlocks.delete(params)
+        if(this.markedBlocks.size == 0) {
+          this.dropBlocks()
+        }
+        break
+      }
+      case 'dropped_block': {
+        console.log('Dropped block: ', params)
+        var block = this.map[params.y][params.x]
+        this.map[block.y][block.x] = undefined
+        this.map[block.y + 1][block.x] = block
+        block.y++
+
+        this.dropping[block.x] = false
+        this.dropBlocks()
+        break
+      }
     }
   }
 }
