@@ -119,37 +119,73 @@ var Field = function(context, width, height) {
     })
   }
 
-  this.markBlocks = function(position) {
-    this.markedBlocks = new Set()
-    var color = this.map[position.y][position.x].color,
-      that = this,
-      checked = new Array(height)
+  this.crawlAround = function(block, callback) {
+    var that = this,
+      checked = new Array(height),
+      color = block.color
     for(var i = 0; i < height; i++) {
       checked[i] = new Array(width)
     }
-    var crawl = function(pos) {
-      if(pos.x < 0 || pos.x >= width || pos.y < 0 || pos.y >= height) {
+    var crawl = function(position) {
+      var fitInWidth = position.x >= 0 && position.x < width,
+        fitInHeight = position.y >= 0 && position.y < height,
+        block = undefined
+      if(!(fitInWidth && fitInHeight)) {
         return
       }
-      if(checked[pos.y][pos.x]) {
+      if(checked[position.y][position.x]) {
         return
       }
-      checked[pos.y][pos.x] = true
-      var block = that.map[pos.y][pos.x]
+      checked[position.y][position.x] = true
+      block = that.map[position.y][position.x]
       if(block != undefined && block.color == color) {
-        that.markedBlocks.add(block)
-        crawl({x: pos.x - 1, y: pos.y})
-        crawl({x: pos.x + 1, y: pos.y})
-        crawl({x: pos.x, y: pos.y - 1})
-        crawl({x: pos.x, y: pos.y + 1})
+        callback(block)
+        crawl({x: position.x - 1, y: position.y})
+        crawl({x: position.x + 1, y: position.y})
+        crawl({x: position.x, y: position.y - 1})
+        crawl({x: position.x, y: position.y + 1})
       }
     }
-    crawl(position)
+    crawl(block)
+  }
+
+  this.markBlocks = function(position) {
+    var that = this
+    this.markedBlocks = new Set()
+    this.crawlAround(this.map[position.y][position.x], function(block) {
+      that.markedBlocks.add(block)
+    })
+  }
+
+  this.checkPossibilities = function() {
+    var possible = false,
+      that = this,
+      checked = Array(height)
+    for(var i = 0; i < height; i++) {
+      checked[i] = Array(width)
+    }
+    this.eachBlock(function(block) {
+      if(block != undefined && !checked[block.y][block.x]) {
+        currentChain = new Set()
+        that.crawlAround(block, function(current) {
+          currentChain.add(current)
+          checked[current.y][current.x] = true
+        })
+        if(currentChain.size >= 3) {
+          possible = true
+          return
+        }
+      }
+    })
+    return possible
   }
 
   this.handleEvent = function(event, params) {
     switch(event) {
       case 'click': {
+        if(params == undefined) {
+          break
+        }
         this.markBlocks(params)
         if(this.markedBlocks.size >= 3) {
           this.score += this.markedBlocks.size
@@ -166,6 +202,9 @@ var Field = function(context, width, height) {
         this.markedBlocks.delete(params)
         if(this.markedBlocks.size == 0) {
           this.dropBlocks()
+          if(!this.checkPossibilities()) {
+            console.log('that is all')
+          }
         }
         break
       }

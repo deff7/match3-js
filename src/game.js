@@ -7,7 +7,7 @@ canvas.height = 700
 
 context.fillStyle = 'green'
 
-var field = new Field(context, 10, 10)
+var field = new Field(context, 5, 5)
 field.generate()
 field.start()
 
