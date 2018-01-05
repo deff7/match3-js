@@ -1,36 +1,39 @@
 var Field = require('./field')
-var canvas = document.getElementById('canvas')
-var context = canvas.getContext('2d')
 
-canvas.width = 700
-canvas.height = 700
+var Game = function(width, height) {
+  var canvas = document.getElementById('canvas')
+  var context = canvas.getContext('2d')
+  var field = new Field(context, width, height)
 
-context.fillStyle = 'green'
+  this.start = function() {
+    field.generate()
+    field.start()
+    addEventListeners()
+  }
 
-var field = new Field(context, 5, 5)
-field.generate()
-field.start()
-
-var getMousePosition = function(event) {
-  var rect = canvas.getBoundingClientRect()
-  return({
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top
-  })
-}
-
-var listeners = {
-  click: 'click',
-  mousemove: 'hover'
-}
-
-for(var eventName in listeners) {
-  (function() {
-    var event = listeners[eventName]
-    canvas.addEventListener(eventName, function(e) {
-      var position = getMousePosition(e)
-      field.emitMouseOnBlockEvent(position.x, position.y, event)
+  var getMousePosition = function(event) {
+    var rect = canvas.getBoundingClientRect()
+    return({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
     })
-  })()
-}
+  }
 
+  var addEventListeners = function() {
+    var listeners = {
+      click: 'click',
+      mousemove: 'hover'
+    }
+
+    for(var eventName in listeners) {
+      (function() {
+        var event = listeners[eventName]
+        canvas.addEventListener(eventName, function(e) {
+          var position = getMousePosition(e)
+          field.emitMouseOnBlockEvent(position.x, position.y, event)
+        })
+      })()
+    }
+  }
+}
+new Game(10, 10).start()
