@@ -23,6 +23,7 @@ var Field = function(context, width, height) {
   }
 
   this.score = 0
+  this.state = 'running'
 
   this.eachBlock = function(callback) {
     for(var y = 0; y < this.height; y++) {
@@ -57,12 +58,21 @@ var Field = function(context, width, height) {
 
   this.render = function() {
     this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height)
-    this.context.fillStyle = 'black'
-    this.eachBlock(function(block) {
-      if(block != undefined) {
-        block.render()
-      }
-    })
+    if(this.state == 'running') {
+      this.eachBlock(function(block) {
+        if(block != undefined) {
+          block.render()
+        }
+      })
+    } else if(this.state == 'game_over') {
+      this.context.fillStyle = 'white'
+      this.context.font = '50px Helvetica'
+      this.context.textAlign = 'center'
+      this.context.fillText(
+        'Game over!',
+        this.context.canvas.width / 2,
+        this.context.canvas.height / 2)
+    }
   }
 
   this.start = function() {
@@ -181,6 +191,9 @@ var Field = function(context, width, height) {
   }
 
   this.handleEvent = function(event, params) {
+    if(this.state == 'game_over') {
+      return
+    }
     switch(event) {
       case 'click': {
         if(params == undefined) {
@@ -203,7 +216,7 @@ var Field = function(context, width, height) {
         if(this.markedBlocks.size == 0) {
           this.dropBlocks()
           if(!this.checkPossibilities()) {
-            console.log('that is all')
+            this.state = 'game_over'
           }
         }
         break
